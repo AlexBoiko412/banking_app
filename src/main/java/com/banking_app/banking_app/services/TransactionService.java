@@ -130,7 +130,7 @@ public class TransactionService {
     }
 
     private void flagLargeTransaction(Transaction t) {
-        if(t.getAmount().compareTo(new BigDecimal(10000)) <= 0) return;
+        if(t.getAmount().compareTo(new BigDecimal("10000")) <= 0) return;
 
         if (t.getTransactionType() == TransactionType.TRANSFER) {
             log.warn("Large {} detected: amount={}, txId={}, senderId={}, receiverId={}, userId={}, at={}",
