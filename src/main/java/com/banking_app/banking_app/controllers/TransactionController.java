@@ -5,6 +5,7 @@ import com.banking_app.banking_app.dtos.TransactionResponse;
 import com.banking_app.banking_app.dtos.TransferRequest;
 import com.banking_app.banking_app.entities.Transaction;
 import com.banking_app.banking_app.services.TransactionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class TransactionController {
 
 
     @PostMapping("/deposit")
-    public ResponseEntity<TransactionResponse> deposit(@RequestBody DepositWithdrawRequest request) {
+    public ResponseEntity<TransactionResponse> deposit(@Valid @RequestBody DepositWithdrawRequest request) {
         Transaction transaction = transactionService.deposit(request.getAccountId(), request.getAmount());
 
         return ResponseEntity
@@ -38,7 +39,7 @@ public class TransactionController {
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<TransactionResponse> withdraw(@RequestBody DepositWithdrawRequest request) {
+    public ResponseEntity<TransactionResponse> withdraw(@Valid @RequestBody DepositWithdrawRequest request) {
         Transaction transaction = transactionService.withdraw(request.getAccountId(), request.getAmount());
 
         return ResponseEntity
@@ -47,7 +48,7 @@ public class TransactionController {
     }
 
     @PostMapping("/transfer")
-    public ResponseEntity<TransactionResponse> transfer(@RequestBody TransferRequest request) {
+    public ResponseEntity<TransactionResponse> transfer(@Valid @RequestBody TransferRequest request) {
         Transaction transaction = transactionService.transfer(
                 request.getSenderId(),
                 request.getReceiverId(),

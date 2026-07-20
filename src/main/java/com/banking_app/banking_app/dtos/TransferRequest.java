@@ -1,12 +1,22 @@
 package com.banking_app.banking_app.dtos;
 
-import lombok.Getter;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-@Getter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class TransferRequest {
+    @NotNull(message = "Bad sender id")
     Long senderId;
+
+    @NotNull(message = "Bad receiver id")
     Long receiverId;
+
+    @NotNull(message = "Missing transfer amount")
     BigDecimal amount;
 }

@@ -5,6 +5,7 @@ import com.banking_app.banking_app.dtos.AccountResponse;
 import com.banking_app.banking_app.dtos.CreateAccountRequest;
 import com.banking_app.banking_app.entities.Account;
 import com.banking_app.banking_app.services.AccountService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class AccountController {
     }
 
     @PostMapping()
-    public ResponseEntity<AccountResponse> createAccount(@RequestBody CreateAccountRequest request) {
+    public ResponseEntity<AccountResponse> createAccount(@Valid @RequestBody CreateAccountRequest request) {
         Account account = accountService.createAccount(request.getUserId(), request.getType());
 
         return ResponseEntity
