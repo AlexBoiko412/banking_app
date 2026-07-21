@@ -13,7 +13,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler({UserNotFoundException.class, AccountNotFoundException.class})
-    ResponseEntity<String> handleNotFound(UserNotFoundException e) {
+    ResponseEntity<String> handleNotFound(RuntimeException e) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(e.getMessage());
@@ -39,11 +39,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
+    @ExceptionHandler(BadCredentialsException.class)
+    ResponseEntity<String> handleBadCredentialsException(BadCredentialsException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     ResponseEntity<String> handleGeneric(Exception e) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(e.getMessage());
+                .body("Something went wrong");
     }
 
 }
