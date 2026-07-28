@@ -6,6 +6,7 @@ import com.banking_app.banking_app.enums.TransactionType;
 import com.banking_app.banking_app.exceptions.*;
 import com.banking_app.banking_app.repositories.AccountRepository;
 import com.banking_app.banking_app.repositories.TransactionRepository;
+import com.banking_app.banking_app.security.interfaces.IAuthenticationFacade;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import java.util.List;
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
+    private final IAuthenticationFacade authenticationFacade;
 
     @Transactional
     public Transaction transfer(Long senderId, Long receiverId, BigDecimal amount) {
@@ -33,7 +35,7 @@ public class TransactionService {
 
         Account
                 sender = accountRepository
-                    .findById(senderId)
+                    .findByIdAndUser_Email(senderId, authenticationFacade.getUsername())
                     .orElseThrow(() -> new AccountNotFoundException(senderId)),
 
                 receiver = accountRepository
@@ -53,18 +55,25 @@ public class TransactionService {
                 .transactionType(TransactionType.TRANSFER)
                 .amount(amount)
                 .bookedTimestamp(bookedTime)
-                .fullfilledTimestamp(LocalDateTime.now())
+                .fulfilledTimestamp(LocalDateTime.now())
                 .receiver(receiver)
                 .sender(sender)
                 .build();
 
-        flagLargeTransaction(transaction);
+        Transaction saved = transactionRepository.save(transaction);
+        flagLargeTransaction(saved);
 
-        return transactionRepository.save(transaction);
+        return saved;
     }
 
     public List<Transaction> getTransactionHistory(Long id) {
-        return transactionRepository.findAllBySenderIdOrReceiverIdOrderByFullfilledTimestampDesc(id, id);
+        String email = authenticationFacade.getUsername();
+        return transactionRepository
+                .findAllBySenderOrReceiverAccAndOwnerEmail(
+                        id,
+                        id,
+                        email
+                );
     }
 
     @Transactional
@@ -74,7 +83,7 @@ public class TransactionService {
         LocalDateTime bookedTime = LocalDateTime.now();
 
         Account account = accountRepository
-                .findById(accountId)
+                .findByIdAndUser_Email(accountId, authenticationFacade.getUsername())
                 .orElseThrow(() -> new AccountNotFoundException(accountId));
 
         account.setBalance(account.getBalance().add(amount));
@@ -85,11 +94,14 @@ public class TransactionService {
                 .transactionType(TransactionType.DEPOSIT)
                 .amount(amount)
                 .bookedTimestamp(bookedTime)
-                .fullfilledTimestamp(LocalDateTime.now())
+                .fulfilledTimestamp(LocalDateTime.now())
                 .sender(account)
                 .build();
 
-        return transactionRepository.save(transaction);
+        Transaction saved = transactionRepository.save(transaction);
+        flagLargeTransaction(saved);
+
+        return saved;
     }
 
     @Transactional
@@ -99,7 +111,7 @@ public class TransactionService {
         LocalDateTime bookedTime = LocalDateTime.now();
 
         Account account = accountRepository
-                .findById(accountId)
+                .findByIdAndUser_Email(accountId, authenticationFacade.getUsername())
                 .orElseThrow(() -> new AccountNotFoundException(accountId));
 
         validateSufficientWithdrawBalance(account.getBalance(), amount);
@@ -112,11 +124,14 @@ public class TransactionService {
                 .transactionType(TransactionType.WITHDRAWAL)
                 .amount(amount)
                 .bookedTimestamp(bookedTime)
-                .fullfilledTimestamp(LocalDateTime.now())
+                .fulfilledTimestamp(LocalDateTime.now())
                 .sender(account)
                 .build();
 
-        return transactionRepository.save(transaction);
+        Transaction saved = transactionRepository.save(transaction);
+        flagLargeTransaction(saved);
+
+        return saved;
     }
 
     private void validateSufficientAmount(BigDecimal amount) {
@@ -136,12 +151,12 @@ public class TransactionService {
             log.warn("Large {} detected: amount={}, txId={}, senderId={}, receiverId={}, userId={}, at={}",
                     t.getTransactionType(), t.getAmount(), t.getId(),
                     t.getSender().getId(), t.getReceiver().getId(),
-                    t.getSender().getUser().getId(), t.getFullfilledTimestamp());
+                    t.getSender().getUser().getId(), t.getFulfilledTimestamp());
         } else {
             log.warn("Large {} detected: amount={}, txId={}, accountId={}, userId={}, at={}",
                     t.getTransactionType(), t.getAmount(), t.getId(),
                     t.getSender().getId(), t.getSender().getUser().getId(),
-                    t.getFullfilledTimestamp());
+                    t.getFulfilledTimestamp());
         }
     }
 }
