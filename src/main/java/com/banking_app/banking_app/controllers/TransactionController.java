@@ -66,7 +66,7 @@ public class TransactionController {
                 .id(t.getId())
                 .senderId(t.getSender().getId())
                 .receiverId(t.getReceiver() != null ? t.getReceiver().getId() : null)
-                .fulfilledAt(t.getFullfilledTimestamp())
+                .fulfilledAt(t.getFulfilledTimestamp())
                 .amount(t.getAmount())
                 .type(t.getTransactionType())
                 .build();

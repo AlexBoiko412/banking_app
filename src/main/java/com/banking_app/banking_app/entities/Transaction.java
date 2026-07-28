@@ -27,7 +27,7 @@ public class Transaction {
     TransactionType transactionType;
 
     LocalDateTime bookedTimestamp;
-    LocalDateTime fullfilledTimestamp;
+    LocalDateTime fulfilledTimestamp;
 
     BigDecimal amount;
 
