@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +28,13 @@ public class GlobalExceptionHandler {
                 .body(e.getMessage());
     }
 
+    @ExceptionHandler({EmailAlreadyExistsException.class, LoginAlreadyExistsException.class})
+    ResponseEntity<String> handleAlreadyExists(RuntimeException e) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(e.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
@@ -44,11 +52,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
     }
 
+    @ExceptionHandler(NoHandlerFoundException.class)
+    ResponseEntity<String> handleNotFound(NoHandlerFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found");
+    }
+
+    @ExceptionHandler(ActionForbidden.class)
+    ResponseEntity<String> handleActionForbidden(ActionForbidden e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     ResponseEntity<String> handleGeneric(Exception e) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Something went wrong");
     }
-
 }
