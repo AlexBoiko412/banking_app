@@ -1,6 +1,5 @@
 package com.banking_app.banking_app.repositories;
 
-import com.banking_app.banking_app.entities.Account;
 import com.banking_app.banking_app.entities.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
