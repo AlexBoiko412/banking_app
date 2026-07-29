@@ -14,8 +14,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     List<Transaction> findAllBySenderIdOrReceiverIdOrderByFulfilledTimestampDesc(Long senderId, Long receiverId);
     @Query("SELECT t FROM Transaction t " +
-            "WHERE (t.sender.id == :senderId OR t.receiver.id == :receiverId)" +
-            "AND (t.sender.user.email == :email OR t.receiver.user.email == :email)" +
+            "WHERE (t.sender.id = :senderId OR t.receiver.id = :receiverId)" +
+            "AND (t.sender.user.email = :email OR t.receiver.user.email = :email)" +
             "ORDER BY t.fulfilledTimestamp DESC")
     List<Transaction> findAllBySenderOrReceiverAccAndOwnerEmail(@Param("senderId") Long senderId, @Param("receiverId") Long receiverId, @Param("email") String email);
 
