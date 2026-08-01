@@ -1,12 +1,14 @@
 package com.banking_app.banking_app.controllers;
 
 import com.banking_app.banking_app.dtos.DepositWithdrawRequest;
+import com.banking_app.banking_app.dtos.PaginatedTransactionsResponse;
 import com.banking_app.banking_app.dtos.TransactionResponse;
 import com.banking_app.banking_app.dtos.TransferRequest;
 import com.banking_app.banking_app.entities.Transaction;
 import com.banking_app.banking_app.services.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +29,24 @@ public class TransactionController {
                 transactions.stream().map(this::toTransactionResponse).toList()
         );
     }
+
+    @GetMapping("/account/{accountId}/paginated")
+    public ResponseEntity<PaginatedTransactionsResponse> getTransactionsPaginated(
+        @PathVariable Long accountId,
+        @RequestParam int page,
+        @RequestParam int pageSize
+    ) {
+        Page<Transaction> paginatedTransactions = transactionService.getTransactionHistoryPaginated(accountId, page, pageSize);
+
+        return ResponseEntity.ok(
+            PaginatedTransactionsResponse.builder()
+                 .totalElements(paginatedTransactions.getTotalElements())
+                 .totalPages(paginatedTransactions.getTotalPages())
+                 .transactions(paginatedTransactions.stream().map(this::toTransactionResponse).toList())
+                 .build()
+        );
+    }
+
 
 
     @PostMapping("/deposit")
