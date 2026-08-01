@@ -10,6 +10,9 @@ import com.banking_app.banking_app.security.interfaces.IAuthenticationFacade;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -68,13 +71,28 @@ public class TransactionService {
 
     public List<Transaction> getTransactionHistory(Long id) {
         String email = authenticationFacade.getUsername();
+
         return transactionRepository
-                .findAllBySenderOrReceiverAccAndOwnerEmail(
-                        id,
+                .findTransactionHistory(
                         id,
                         email
                 );
     }
+
+    public Page<Transaction>  getTransactionHistoryPaginated(Long id, int pageNumber, int pageSize) {
+        String email = authenticationFacade.getUsername();
+
+        Pageable paginationRequest = PageRequest.of(pageNumber, pageSize);
+
+        return transactionRepository
+            .findTransactionHistoryPaginated(
+                id,
+                email,
+                paginationRequest
+            );
+    }
+
+
 
     @Transactional
     public Transaction deposit(Long accountId, BigDecimal amount) {
